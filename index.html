@@ -405,6 +405,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="nav-item" data-page="equipe"><i class="ti ti-id-badge"></i><span>Equipe</span></div>
       <div class="nav-item" data-page="reuniao"><i class="ti ti-video"></i><span>Reunião</span></div>
       <div class="nav-item" data-page="scripts"><i class="ti ti-message-2-text"></i><span>Scripts</span></div>
+      <div class="nav-item" data-page="treinamentos"><i class="ti ti-school"></i><span>Treinamentos</span></div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Admin</div>
@@ -486,8 +487,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="dash-bot">
         <div class="card">
-          <div class="card-label">Último relatório</div>
-          <div id="last-report" style="font-size:13px;color:var(--text3);line-height:1.8;margin-top:8px;white-space:pre-wrap;font-family:monospace;">Nenhum relatório enviado hoje.</div>
+          <div class="card-label" style="margin-bottom:14px">⚡ Acesso rápido</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div onclick="navTo('relatorio')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2dfd9'" onmouseout="this.style.background='var(--surface2)'">
+              <i class="ti ti-clipboard-text" style="font-size:20px;color:#5B7FA6;"></i>
+              <div><div style="font-size:13px;font-weight:600;color:var(--night);">Relatório diário</div><div style="font-size:11px;color:var(--text3);">Preencher e enviar</div></div>
+            </div>
+            <div onclick="navTo('clientes')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2dfd9'" onmouseout="this.style.background='var(--surface2)'">
+              <i class="ti ti-users" style="font-size:20px;color:#2E9E6A;"></i>
+              <div><div style="font-size:13px;font-weight:600;color:var(--night);">Clientes</div><div style="font-size:11px;color:var(--text3);">Ver e gerenciar</div></div>
+            </div>
+            <div onclick="navTo('scripts')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2dfd9'" onmouseout="this.style.background='var(--surface2)'">
+              <i class="ti ti-message-2-text" style="font-size:20px;color:#B87820;"></i>
+              <div><div style="font-size:13px;font-weight:600;color:var(--night);">Scripts</div><div style="font-size:11px;color:var(--text3);">Textos prontos</div></div>
+            </div>
+            <div onclick="navTo('treinamentos')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2dfd9'" onmouseout="this.style.background='var(--surface2)'">
+              <i class="ti ti-school" style="font-size:20px;color:#8B5CF6;"></i>
+              <div><div style="font-size:13px;font-weight:600;color:var(--night);">Treinamentos</div><div style="font-size:11px;color:var(--text3);">Vídeos e materiais</div></div>
+            </div>
+          </div>
         </div>
         <div class="card admin-only">
           <div class="card-label" style="margin-bottom:6px">Aniversários próximos</div>
@@ -511,12 +529,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </div>
           <div class="rep-row">
             <div><label class="field-label">Leads Instagram</label><input type="number" class="input" id="rep-ig" min="0" value="0"></div>
-            <div><label class="field-label">Agendamentos</label><input type="number" class="input" id="rep-ag" min="0" value="0"></div>
+            <div><label class="field-label">Agendamentos feitos 🆕</label><input type="number" class="input" id="rep-ag" min="0" value="0"></div>
           </div>
-          <div><label class="field-label">Nomes agendados (um por linha)</label><textarea class="textarea" id="rep-nomes" placeholder="Maria Silva – confirmada"></textarea></div>
+          <div><label class="field-label">Nomes agendados (um por linha)</label><textarea class="textarea" id="rep-nomes" placeholder="Maria Silva – Botox – 20/06"></textarea></div>
           <div class="rep-row">
+            <div><label class="field-label">Agendamentos confirmados ✅</label><input type="number" class="input" id="rep-conf" min="0" value="0"></div>
             <div><label class="field-label">Em conversa</label><input type="number" class="input" id="rep-conv" min="0" value="0"></div>
-            <div><label class="field-label">Procedimentos</label><input type="number" class="input" id="rep-prcd" min="0" value="0"></div>
+          </div>
+          <div><label class="field-label">Detalhes confirmados (um por linha)</label><textarea class="textarea" id="rep-conf-nomes" placeholder="Felipe Marcilican – Estética íntima – 12/07"></textarea></div>
+          <div class="rep-row">
+            <div><label class="field-label">Procedimentos realizados</label><input type="number" class="input" id="rep-prcd" min="0" value="0"></div>
           </div>
           <div><label class="field-label">Observações</label><textarea class="textarea" id="rep-obs" placeholder="Pontos de melhoria..."></textarea></div>
           <div style="display:flex;gap:10px;align-items:center;">
@@ -610,7 +632,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div id="scripts-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:4px;"></div>
     </div>
 
-    <!-- CHECKLIST (admin) -->
+    <!-- TREINAMENTOS -->
+    <div class="page" id="page-treinamentos">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div><h2>Treinamentos</h2><p>Vídeos, links e materiais para o time</p></div>
+        <button class="btn btn-primary admin-only" onclick="openTreinModal()"><i class="ti ti-plus"></i> Adicionar</button>
+      </div>
+      <div id="trein-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:4px;"></div>
+    </div>
+
+        <!-- CHECKLIST (admin) -->
     <div class="page" id="page-checklist">
       <div class="page-header"><h2>Checklist</h2><p>Tarefas do dia — reinicia toda manhã automaticamente</p></div>
       <div class="card" style="max-width:600px;">
@@ -632,17 +663,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="grid-2">
         <div class="card" style="display:flex;flex-direction:column;gap:12px;">
-          <div class="card-label">Métricas do mês</div>
+          <div class="card-label" style="margin-bottom:12px;">📊 Métricas do mês</div>
           <div class="metrics-grid">
-            <div><label class="field-label">Leads</label><input type="number" class="input" id="cr-leads" value="0" min="0"></div>
-            <div><label class="field-label">Agendamentos</label><input type="number" class="input" id="cr-agenda" value="0" min="0"></div>
-            <div><label class="field-label">Conversões</label><input type="number" class="input" id="cr-conv" value="0" min="0"></div>
-            <div><label class="field-label">Mensagens</label><input type="number" class="input" id="cr-msgs" value="0" min="0"></div>
-            <div><label class="field-label">Follow-ups</label><input type="number" class="input" id="cr-fu" value="0" min="0"></div>
-            <div><label class="field-label">Procedimentos</label><input type="number" class="input" id="cr-proc" value="0" min="0"></div>
+            <div><label class="field-label">Leads recebidos</label><input type="number" class="input" id="cr-leads" value="0" min="0" oninput="calcCrTaxas()"></div>
+            <div><label class="field-label">Follow-ups realizados</label><input type="number" class="input" id="cr-fu" value="0" min="0"></div>
+            <div><label class="field-label">Agendamentos feitos</label><input type="number" class="input" id="cr-agenda" value="0" min="0" oninput="calcCrTaxas()"></div>
+            <div><label class="field-label">Consultas realizadas</label><input type="number" class="input" id="cr-conv" value="0" min="0" oninput="calcCrTaxas()"></div>
+            <div><label class="field-label">No-show</label><input type="number" class="input" id="cr-noshow" value="0" min="0"></div>
+            <div><label class="field-label">Mensagens recebidas</label><input type="number" class="input" id="cr-msgs" value="0" min="0"></div>
           </div>
-          <div><label class="field-label">Observações</label><textarea class="textarea" id="cr-obs" placeholder="Destaques do mês..."></textarea></div>
-          <button class="btn btn-primary" onclick="saveClientReport()"><i class="ti ti-device-floppy"></i> Salvar relatório</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;background:var(--surface2);border-radius:10px;margin-top:4px;">
+            <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">Leads → Agendamentos</div><div id="cr-taxa1" style="font-size:18px;font-weight:700;color:var(--steel);">—</div></div>
+            <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">Agend. → Comparecimento</div><div id="cr-taxa2" style="font-size:18px;font-weight:700;color:var(--success);">—</div></div>
+          </div>
+          <div style="margin-top:12px;"><label class="field-label">🏆 Top 3 procedimentos mais procurados</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px;">
+              <div><input type="text" class="input" id="cr-top1" placeholder="🥇 Ex: Botox" style="font-size:12px;"></div>
+              <div><input type="text" class="input" id="cr-top2" placeholder="🥈 Ex: Preenchimento" style="font-size:12px;"></div>
+              <div><input type="text" class="input" id="cr-top3" placeholder="🥉 Ex: Skinbooster" style="font-size:12px;"></div>
+            </div>
+          </div>
+          <div style="margin-top:10px;"><label class="field-label">💬 Principais objeções identificadas</label><textarea class="textarea" id="cr-objecoes" placeholder="1. Leads não retornam o 1º contato&#10;2. Objeção de preço&#10;3. Prefere deixar para depois" style="min-height:80px;"></textarea></div>
+          <div style="margin-top:10px;"><label class="field-label">🔎 Insights do mês</label><textarea class="textarea" id="cr-insights" placeholder="Origem dos leads, perfil predominante..." style="min-height:60px;"></textarea></div>
+          <div style="margin-top:10px;"><label class="field-label">✅ Destaques</label><textarea class="textarea" id="cr-destaques" placeholder="Pontos positivos do mês..." style="min-height:60px;"></textarea></div>
+          <div style="margin-top:10px;"><label class="field-label">🚀 Plano de ação próximo mês</label><textarea class="textarea" id="cr-plano" placeholder="1. Trabalhar follow-up&#10;2. Testar novas abordagens" style="min-height:80px;"></textarea></div>
+          <div style="margin-top:10px;"><label class="field-label">Observações gerais</label><textarea class="textarea" id="cr-obs" placeholder="Destaques do mês..." style="min-height:60px;"></textarea></div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary" onclick="saveClientReport()"><i class="ti ti-device-floppy"></i> Salvar</button>
+            <button class="btn btn-ghost" onclick="gerarTextoCr()"><i class="ti ti-copy"></i> Gerar texto WhatsApp</button>
+          </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:14px;">
           <div class="card">
@@ -654,8 +703,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             </div>
           </div>
           <div class="card">
+            <div class="card-label" style="margin-bottom:10px">📈 Comparativo — mês atual vs anterior</div>
+            <canvas id="cr-chart" height="140"></canvas>
+            <div id="cr-chart-empty" style="font-size:12px;color:var(--text3);text-align:center;padding:20px 0;">Salve ao menos 2 meses para ver o gráfico.</div>
+          </div>
+          <div class="card">
             <div class="card-label" style="margin-bottom:10px">Histórico salvo</div>
             <div id="cr-history" style="display:flex;flex-wrap:wrap;gap:6px;"><span style="font-size:12px;color:var(--text3);">Nenhum relatório ainda.</span></div>
+          </div>
+          <div class="card" id="cr-preview-card" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div class="card-label">Texto gerado</div>
+              <button class="btn btn-primary btn-sm" onclick="copyCrTexto()"><i class="ti ti-copy"></i> Copiar</button>
+            </div>
+            <pre id="cr-preview-txt" style="font-size:12px;line-height:1.7;white-space:pre-wrap;color:var(--text2);max-height:400px;overflow-y:auto;"></pre>
           </div>
         </div>
       </div>
@@ -762,6 +823,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-team')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveTeamMember()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TREINAMENTO -->
+<div class="modal-overlay" id="modal-trein">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-trein-title">Novo treinamento</div>
+      <button class="modal-close" onclick="closeModal('modal-trein')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="trein-id">
+    <div class="form-group-v"><label class="field-label">Título</label><input type="text" class="input" id="trein-titulo" placeholder="Ex: Como fazer follow-up eficiente"></div>
+    <div class="form-group-v"><label class="field-label">Tipo</label>
+      <select class="select" id="trein-tipo">
+        <option value="video">🎬 Vídeo (YouTube)</option>
+        <option value="link">🔗 Link externo</option>
+        <option value="texto">📝 Orientação em texto</option>
+      </select>
+    </div>
+    <div class="form-group-v" id="trein-url-wrap"><label class="field-label">URL</label><input type="text" class="input" id="trein-url" placeholder="https://..."></div>
+    <div class="form-group-v"><label class="field-label">Descrição / Orientações</label><textarea class="textarea" id="trein-desc" style="min-height:100px;" placeholder="O que aprender neste treinamento..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-trein')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTreinamento()"><i class="ti ti-device-floppy"></i> Salvar</button>
     </div>
   </div>
 </div>
@@ -921,6 +1007,14 @@ window.doLogin=async function(){
   currentUser=u;
   startApp(u);
 };
+window.navTo=function(page){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const navEl=document.querySelector(`.nav-item[data-page="${page}"]`);
+  const pageEl=document.getElementById(`page-${page}`);
+  if(navEl)navEl.classList.add('active');
+  if(pageEl)pageEl.classList.add('active');
+};
 window.doLogout=function(){
   currentUser=null;
   document.getElementById('app').classList.remove('visible','is-admin');
@@ -983,6 +1077,7 @@ function startApp(u){
   loadYT();
   loadBirthdays();
   loadStatsRealtime();
+  loadTreinamentos();
   if(u.isAdmin){populateCrSelects();loadConfigTeam();loadTeamManagement();}
 }
 
@@ -1126,7 +1221,7 @@ function populateRepCliente(){
   const cl=currentUser.isAdmin?ALL_CLIENTS:currentUser.clients;
   s.innerHTML=cl.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
-['rep-rec','rep-fu','rep-ig','rep-ag','rep-nomes','rep-conv','rep-prcd','rep-obs','rep-cliente'].forEach(id=>{
+['rep-rec','rep-fu','rep-ig','rep-ag','rep-nomes','rep-conf','rep-conf-nomes','rep-conv','rep-prcd','rep-obs','rep-cliente'].forEach(id=>{
   setTimeout(()=>{const el=document.getElementById(id);if(el)el.addEventListener('input',updatePreview);},500);
 });
 function updatePreview(){
@@ -1137,7 +1232,10 @@ function updatePreview(){
   const obs=(document.getElementById('rep-obs')?.value||'').trim();
   const nomesL=nomes?nomes.split('\n').map(l=>'• '+l.trim()).join('\n'):'• —';
   const obsL=obs?obs.split('\n').map(l=>'• '+l.trim()).join('\n'):'• —';
-  const t=`*📋 FEEDBACK DO DIA – ${dd}/${mm}*\n\n📩 Mensagens recebidas de anúncios: ${get('rep-rec')}\n\n💬 Mensagens enviadas (follow-up): ${get('rep-fu')}\n\n📱 Leads Instagram: ${get('rep-ig')}\n\n🗓️ Agendamentos confirmados: ${get('rep-ag')}\n${nomesL}\n\n🔁 Pessoas em conversa (ainda sem agendamento): ${get('rep-conv')}\n\n✅ Procedimentos realizados: ${get('rep-prcd')}\n\n💡 Observações / pontos de melhoria do dia:\n${obsL}`;
+  const confNomesRaw=(document.getElementById('rep-conf-nomes')?.value||'').trim();
+  const confL=confNomesRaw?confNomesRaw.split('\n').map(l=>'• '+l.trim()).join('\n'):'';
+  const conf=get('rep-conf');
+  const t=`*📋 FEEDBACK DO DIA – ${dd}/${mm}*\n\n📩 Mensagens recebidas de anúncios: ${get('rep-rec')}\n\n💬 Mensagens enviadas (follow-up): ${get('rep-fu')}\n\n📱 Leads Instagram: ${get('rep-ig')}\n\n📅 Agendamentos feitos: ${get('rep-ag')}\n${nomesL}\n\n🗓️ Agendamentos confirmados (amanhã): ${conf}${confL?'\n'+confL:''}\n\n🔁 Pessoas em conversa (ainda sem agendamento): ${get('rep-conv')}\n\n✅ Procedimentos realizados: ${get('rep-prcd')}\n\n💡 Observações / pontos de melhoria do dia:\n${obsL}`;
   document.getElementById('report-preview').textContent=t;
   window._repText=t;
   document.getElementById('stat-leads').textContent=get('rep-ig');
@@ -1529,21 +1627,16 @@ function renderMpControls(){
     ${isAdmin?`<button class="mp-btn" onclick="ytPrev()" title="Anterior"><i class="ti ti-player-skip-back"></i></button>`:''}
     <button class="mp-btn play" onclick="ytPlayPause()"><i class="ti ti-player-${playing?'pause':'play'}"></i></button>
     ${isAdmin?`<button class="mp-btn" onclick="ytNext()" title="Próxima"><i class="ti ti-player-skip-forward"></i></button>`:''}`;
-  // Atualizar thumbnail do vídeo atual
+  // Thumbnail: tenta getVideoData, fallback para videoId atual
   try{
-    const vid=ytPlayer&&ytPlayer.getVideoData?ytPlayer.getVideoData().video_id:null;
+    const data=ytPlayer&&ytPlayer.getVideoData?ytPlayer.getVideoData():{};
+    const vid=data.video_id||window._ytVid;
     const thumbEl=document.getElementById('mp-thumb-inner');
-    const titleEl=document.getElementById('mp-title');
     if(vid&&thumbEl){
-      thumbEl.style.backgroundImage=`url(https://img.youtube.com/vi/${vid}/mqdefault.jpg)`;
-      thumbEl.style.backgroundSize='cover';
-      thumbEl.style.backgroundPosition='center';
-      thumbEl.style.background='';
+      thumbEl.innerHTML=`<img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`;
     }
-    if(vid&&titleEl){
-      const data=ytPlayer.getVideoData();
-      if(data&&data.title)titleEl.textContent=data.title;
-    }
+    const titleEl=document.getElementById('mp-title');
+    if(data.title&&titleEl)titleEl.textContent=data.title;
   }catch(e){}
 }
 function ytIsPlaying(){try{return ytPlayer&&ytPlayer.getPlayerState()===1;}catch(e){return false;}}
@@ -1577,11 +1670,21 @@ async function loadCrData(){
   const snap=await getDoc(doc(db,'client_reports',slug,'months',id));
   if(snap.exists()){
     const d=snap.data();
-    ['leads','agenda','conv','msgs','fu','proc'].forEach(k=>document.getElementById('cr-'+k).value=d[k]||0);
+    ['leads','agenda','conv','msgs','fu','proc','noshow'].forEach(k=>{const el=document.getElementById('cr-'+k);if(el)el.value=d[k]||0;});
     document.getElementById('cr-obs').value=d.obs||'';
+    document.getElementById('cr-top1').value=d.top1||'';
+    document.getElementById('cr-top2').value=d.top2||'';
+    document.getElementById('cr-top3').value=d.top3||'';
+    document.getElementById('cr-objecoes').value=d.objecoes||'';
+    document.getElementById('cr-insights').value=d.insights||'';
+    document.getElementById('cr-destaques').value=d.destaques||'';
+    document.getElementById('cr-plano').value=d.plano||'';
+    calcCrTaxas();
+    renderCrChart(slug,mes,ano);
   }else{
-    ['cr-leads','cr-agenda','cr-conv','cr-msgs','cr-fu','cr-proc'].forEach(i=>document.getElementById(i).value=0);
-    document.getElementById('cr-obs').value='';
+    ['cr-leads','cr-agenda','cr-conv','cr-msgs','cr-fu','cr-proc','cr-noshow'].forEach(i=>{const el=document.getElementById(i);if(el)el.value=0;});
+    ['cr-obs','cr-top1','cr-top2','cr-top3','cr-objecoes','cr-insights','cr-destaques','cr-plano'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+    calcCrTaxas();
   }
 }
 function updateCrLink(){
@@ -1614,10 +1717,18 @@ window.saveClientReport=async function(){
     msgs:parseInt(document.getElementById('cr-msgs').value)||0,
     fu:parseInt(document.getElementById('cr-fu').value)||0,
     proc:parseInt(document.getElementById('cr-proc').value)||0,
+    noshow:parseInt(document.getElementById('cr-noshow').value)||0,
+    top1:document.getElementById('cr-top1').value.trim(),
+    top2:document.getElementById('cr-top2').value.trim(),
+    top3:document.getElementById('cr-top3').value.trim(),
+    objecoes:document.getElementById('cr-objecoes').value.trim(),
+    insights:document.getElementById('cr-insights').value.trim(),
+    destaques:document.getElementById('cr-destaques').value.trim(),
+    plano:document.getElementById('cr-plano').value.trim(),
     obs:document.getElementById('cr-obs').value.trim(),
     savedAt:serverTimestamp()
   });
-  loadCrHistory();showToast('Relatório salvo! Link ativo.','success');
+  loadCrHistory();renderCrChart(slug,mes,ano);showToast('Relatório salvo! Link ativo.','success');
 };
 window.copyCrLink=function(){
   if(!window._crLink)return;
@@ -1770,6 +1881,163 @@ window.saveTeamMember=async function(){
   loadTeamGrid();
   showToast('Colaboradora salva!','success');
 };
+
+// ═══ TREINAMENTOS ═══
+function loadTreinamentos(){
+  const q=query(collection(db,'treinamentos'),orderBy('createdAt','desc'));
+  onSnapshot(q,snap=>{
+    const items=[];snap.forEach(d=>items.push({id:d.id,...d.data()}));
+    const grid=document.getElementById('trein-grid');
+    if(!grid)return;
+    if(!items.length){grid.innerHTML='<div class="empty-state"><i class="ti ti-school"></i>Nenhum treinamento cadastrado.</div>';return;}
+    grid.innerHTML=items.map(t=>{
+      let media='';
+      if(t.tipo==='video'&&t.url){
+        const m=t.url.match(/(?:v=|youtu\.be\/)([^&\s]+)/);
+        const vid=m?m[1]:null;
+        media=vid?`<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;margin-bottom:12px;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/${vid}" allowfullscreen></iframe></div>`:'';
+      } else if(t.tipo==='link'&&t.url){
+        media=`<a href="${t.url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--steel);margin-bottom:10px;"><i class="ti ti-external-link"></i> Acessar link</a>`;
+      }
+      return`<div class="card" style="display:flex;flex-direction:column;">
+        ${media}
+        <div style="font-weight:600;font-size:14px;color:var(--night);margin-bottom:6px;">${t.titulo}</div>
+        ${t.desc?`<div style="font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-wrap;">${t.desc}</div>`:''}
+        <div style="margin-top:10px;display:flex;justify-content:flex-end;" class="admin-only">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="deleteTrein('${t.id}')"><i class="ti ti-trash" style="color:var(--danger);"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+window.openTreinModal=function(){
+  document.getElementById('trein-id').value='';
+  document.getElementById('trein-titulo').value='';
+  document.getElementById('trein-tipo').value='video';
+  document.getElementById('trein-url').value='';
+  document.getElementById('trein-desc').value='';
+  document.getElementById('modal-trein').classList.add('open');
+};
+window.saveTreinamento=async function(){
+  const titulo=document.getElementById('trein-titulo').value.trim();
+  if(!titulo){showToast('Título obrigatório','error');return;}
+  const data={titulo,tipo:document.getElementById('trein-tipo').value,url:document.getElementById('trein-url').value.trim(),desc:document.getElementById('trein-desc').value.trim(),author:currentUser.name,createdAt:serverTimestamp()};
+  await addDoc(collection(db,'treinamentos'),data);
+  closeModal('modal-trein');
+  showToast('Treinamento salvo!','success');
+};
+window.deleteTrein=async function(id){
+  if(!confirm('Remover este treinamento?'))return;
+  await deleteDoc(doc(db,'treinamentos',id));
+  showToast('Removido!','success');
+};
+
+// ═══ RELATÓRIO MENSAL — EXTRAS ═══
+window.calcCrTaxas=function(){
+  const leads=parseInt(document.getElementById('cr-leads')?.value)||0;
+  const ag=parseInt(document.getElementById('cr-agenda')?.value)||0;
+  const conv=parseInt(document.getElementById('cr-conv')?.value)||0;
+  const t1=document.getElementById('cr-taxa1');
+  const t2=document.getElementById('cr-taxa2');
+  if(t1)t1.textContent=leads>0?Math.round(ag/leads*100)+'%':'—';
+  if(t2)t2.textContent=ag>0?Math.round(conv/ag*100)+'%':'—';
+};
+
+window.gerarTextoCr=function(){
+  const cl=document.getElementById('cr-cliente')?.value||'Cliente';
+  const mes=document.getElementById('cr-mes')?.value;
+  const ano=document.getElementById('cr-ano')?.value;
+  const mn=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mesNome=mn[(parseInt(mes)||1)-1];
+  const leads=document.getElementById('cr-leads')?.value||'0';
+  const fu=document.getElementById('cr-fu')?.value||'0';
+  const ag=document.getElementById('cr-agenda')?.value||'0';
+  const conv=document.getElementById('cr-conv')?.value||'0';
+  const noshow=document.getElementById('cr-noshow')?.value||'0';
+  const taxa1=leads>0?Math.round(parseInt(ag)/parseInt(leads)*100)+'%':'—';
+  const taxa2=ag>0?Math.round(parseInt(conv)/parseInt(ag)*100)+'%':'—';
+  const top1=document.getElementById('cr-top1')?.value.trim()||'—';
+  const top2=document.getElementById('cr-top2')?.value.trim()||'—';
+  const top3=document.getElementById('cr-top3')?.value.trim()||'—';
+  const objecoes=document.getElementById('cr-objecoes')?.value.trim()||'';
+  const insights=document.getElementById('cr-insights')?.value.trim()||'';
+  const destaques=document.getElementById('cr-destaques')?.value.trim()||'';
+  const plano=document.getElementById('cr-plano')?.value.trim()||'';
+  const firstName=cl.replace(/^(Dr|Dra|Podo)\./i,'').trim().split(' ')[0];
+  const mmAno=String(mes).padStart(2,'0')+'/'+String(ano).slice(-2);
+  const fmt=(txt)=>txt.split('\n').filter(Boolean).map((l,i)=>`${i+1}. ${l.replace(/^\d+\.\s*/,'')}`).join('\n');
+  const txt=`📊 *VIRTUALIZAAÍ - RELATÓRIO MENSAL – [${mmAno}]*
+Olá, *${firstName}*! 💙
+Segue o resumo do mês e principais insights de ${mesNome}.
+
+📈 *RESULTADOS DO MÊS*
+• Leads recebidos: ${leads}
+• Follow-ups realizados: ${fu}
+• Agendamentos realizados: ${ag}
+• Consultas realizadas: ${conv}
+• Não comparecimentos (no-show): ${noshow}
+
+🎯 *TAXA DE CONVERSÃO*
+• Leads → Agendamentos: ${taxa1}
+• Agendamentos → Comparecimento: ${taxa2}
+${objecoes?`
+💬 *PRINCIPAIS DÚVIDAS E OBJEÇÕES*
+Durante os atendimentos, identificamos que os principais motivos que impactaram a conversão foram:
+${fmt(objecoes)}`:''}
+${top1!=='—'?`
+🏆 *TOP 3 PROCEDIMENTOS MAIS PROCURADOS*
+🥇 ${top1}
+🥈 ${top2}
+🥉 ${top3}`:''}
+${insights?`
+🔎 *INSIGHTS DO MÊS*
+${insights}`:''}
+${destaques?`
+✅ *DESTAQUES*
+${destaques}`:''}
+${plano?`
+🚀 *PLANO DE AÇÃO DO PRÓXIMO MÊS*
+${fmt(plano)}`:''}
+Seguimos acompanhando cada oportunidade de perto para transformar interesse em consultas e gerar resultados consistentes.
+*Giovanna e Equipe Virtualizaaí*
+*Serviço virtual, impacto real. 💙🚀*`;
+  document.getElementById('cr-preview-txt').textContent=txt;
+  document.getElementById('cr-preview-card').style.display='block';
+  window._crTexto=txt;
+};
+window.copyCrTexto=function(){
+  navigator.clipboard.writeText(window._crTexto||'').then(()=>showToast('Texto copiado!','success'));
+};
+
+// Gráfico comparativo
+async function renderCrChart(slug,mes,ano){
+  const canvas=document.getElementById('cr-chart');
+  const empty=document.getElementById('cr-chart-empty');
+  if(!canvas)return;
+  // Mês anterior
+  let mesAnt=parseInt(mes)-1,anoAnt=parseInt(ano);
+  if(mesAnt<1){mesAnt=12;anoAnt--;}
+  const idAtual=`${ano}-${String(mes).padStart(2,'0')}`;
+  const idAnt=`${anoAnt}-${String(mesAnt).padStart(2,'0')}`;
+  const [snapAt,snapAnt]=await Promise.all([
+    getDoc(doc(db,'client_reports',slug,'months',idAtual)),
+    getDoc(doc(db,'client_reports',slug,'months',idAnt))
+  ]);
+  if(!snapAt.exists()&&!snapAnt.exists()){canvas.style.display='none';if(empty)empty.style.display='block';return;}
+  canvas.style.display='block';if(empty)empty.style.display='none';
+  const at=snapAt.exists()?snapAt.data():{};
+  const ant=snapAnt.exists()?snapAnt.data():{};
+  const mn=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const labels=['Leads','Follow-ups','Agend.','Consultas'];
+  const dataAt=[at.leads||0,at.fu||0,at.agenda||0,at.conv||0];
+  const dataAnt=[ant.leads||0,ant.fu||0,ant.agenda||0,ant.conv||0];
+  if(window._crChartInst)window._crChartInst.destroy();
+  const Chart=window.Chart;if(!Chart)return;
+  window._crChartInst=new Chart(canvas,{type:'bar',data:{labels,datasets:[
+    {label:mn[mesAnt-1]+'/'+String(anoAnt).slice(-2),data:dataAnt,backgroundColor:'rgba(136,145,176,0.5)',borderColor:'#8891B0',borderWidth:1.5,borderRadius:4},
+    {label:mn[parseInt(mes)-1]+'/'+String(ano).slice(-2),data:dataAt,backgroundColor:'rgba(91,127,166,0.7)',borderColor:'#5B7FA6',borderWidth:1.5,borderRadius:4}
+  ]},options:{responsive:true,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
+}
 
 // ═══ PORTAL CLIENTE ═══
 async function loadClientPortal(slug){
