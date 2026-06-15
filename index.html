@@ -461,6 +461,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
               <button class="btn btn-primary btn-sm" onclick="postAviso()"><i class="ti ti-send"></i></button>
             </div>
           </div>
+          <!-- Destaque do mês — discreto, abaixo dos avisos -->
+          <div id="dash-destaque" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:none;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;">🏆</span>
+              <div>
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text3);">Destaque do mês</div>
+                <div id="dash-destaque-txt" style="font-size:13px;font-weight:600;color:var(--night);"></div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-label" style="margin-bottom:14px">📅 Calendário</div>
@@ -479,7 +489,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="card-label">Último relatório</div>
           <div id="last-report" style="font-size:13px;color:var(--text3);line-height:1.8;margin-top:8px;white-space:pre-wrap;font-family:monospace;">Nenhum relatório enviado hoje.</div>
         </div>
-        <div class="card">
+        <div class="card admin-only">
           <div class="card-label" style="margin-bottom:6px">Aniversários próximos</div>
           <div id="dash-birthdays"><div class="empty-state"><i class="ti ti-cake"></i>Nenhum aniversário próximo.</div></div>
         </div>
@@ -540,6 +550,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <!-- EQUIPE -->
     <div class="page" id="page-equipe">
       <div class="page-header"><h2>Equipe</h2><p>Quem faz a Virtualizaaí acontecer</p></div>
+      <!-- Destaque do Mês -->
+      <div id="destaque-mes-card" style="margin-bottom:24px;display:none;">
+        <div class="card" style="background:linear-gradient(135deg,#1A1E35 0%,#2d3561 100%);color:#E8E6E0;border:none;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div style="font-size:36px;">🏆</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#8891B0;margin-bottom:4px;">✦ Destaque do Mês</div>
+              <div id="destaque-nome" style="font-size:20px;font-weight:700;letter-spacing:-0.3px;"></div>
+              <div id="destaque-info" style="font-size:13px;color:#8891B0;margin-top:2px;"></div>
+            </div>
+            <div style="text-align:right;">
+              <div id="destaque-total" style="font-size:32px;font-weight:800;color:#5B7FA6;"></div>
+              <div style="font-size:11px;color:#8891B0;">agendamentos</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="team-grid" id="team-grid"></div>
     </div>
 
@@ -573,6 +600,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
         <div><h2>Scripts</h2><p>Textos prontos para o atendimento</p></div>
         <button class="btn btn-primary admin-only" onclick="openScriptModal()"><i class="ti ti-plus"></i> Novo script</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="script-tabs">
+        <button class="btn btn-primary script-tab-btn active" data-cat="Atendimento WhatsApp" onclick="filterScripts(this,'Atendimento WhatsApp')">📱 Atendimento WhatsApp</button>
+        <button class="btn btn-ghost script-tab-btn" data-cat="Social Selling" onclick="filterScripts(this,'Social Selling')">🤝 Social Selling</button>
+        <button class="btn btn-ghost script-tab-btn" data-cat="Quebra de Objeções" onclick="filterScripts(this,'Quebra de Objeções')">🛡️ Quebra de Objeções</button>
+        <button class="btn btn-ghost script-tab-btn" data-cat="Cadência de Follow-Ups" onclick="filterScripts(this,'Cadência de Follow-Ups')">🔁 Cadência de Follow-Ups</button>
       </div>
       <div id="scripts-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:4px;"></div>
     </div>
@@ -745,6 +778,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="modal-title">Novo script</div>
       <button class="modal-close" onclick="closeModal('modal-script')"><i class="ti ti-x"></i></button>
     </div>
+    <div class="form-group-v"><label class="field-label">Categoria</label>
+      <select class="select" id="sc-cat">
+        <option value="Atendimento WhatsApp">📱 Atendimento WhatsApp</option>
+        <option value="Social Selling">🤝 Social Selling</option>
+        <option value="Quebra de Objeções">🛡️ Quebra de Objeções</option>
+        <option value="Cadência de Follow-Ups">🔁 Cadência de Follow-Ups</option>
+      </select>
+    </div>
     <div class="form-group-v"><label class="field-label">Título</label><input type="text" class="input" id="sc-title" placeholder="Ex: Primeiro contato"></div>
     <div class="form-group-v"><label class="field-label">Texto do script</label><textarea class="textarea" id="sc-body" style="min-height:140px;" placeholder="Olá, tudo bem?..."></textarea></div>
     <div class="modal-footer">
@@ -783,7 +824,7 @@ window._fb={collection,doc,setDoc,getDoc,getDocs,addDoc,query,orderBy,onSnapshot
 
 // ═══ EQUIPE ═══
 window.TEAM=[
-  {name:'Giovanna',pw:'admin123',role:'Gestora Boss',isAdmin:true,clients:['Juliana Carriel','Gabriel Machado'],slug:'giovanna'},
+  {name:'Giovanna',pw:'admin123',role:'Gestora Boss',isAdmin:true,clients:['Podo. Juliana Carriel','Dr. Gabriel Machado'],slug:'giovanna'},
   {name:'Riader',pw:'admin123',role:'Admin',isAdmin:true,clients:['Matheus Foletto'],slug:'riader'},
   {name:'Francinete',pw:'cola1',role:'Colaboradora',isAdmin:false,clients:['Dra. Halana Nicoletti','Dra. Marcelo Tanaka','Dra. Mariana Fernandes','Dra. Adila Taí','Dra. Ana Lydia'],slug:'francinete'},
   {name:'Ana Yorrana',pw:'cola2',role:'Colaboradora',isAdmin:false,clients:['Dra. Karina Lima','Dra. Isabelle Sucoski','Dra. Djanine Nascimentos','Dra. Indianara Masiero'],slug:'ana-yorrana'},
@@ -791,7 +832,7 @@ window.TEAM=[
   {name:'Verônica',pw:'cola4',role:'Colaboradora',isAdmin:false,clients:['Dra. Marcia Freitas'],slug:'veronica'},
 ];
 
-window.ALL_CLIENTS=['Juliana Carriel','Gabriel Machado','Dra. Halana Nicoletti','Dra. Marcelo Tanaka','Dra. Mariana Fernandes','Dra. Adila Taí','Dra. Ana Lydia','Dra. Karina Lima','Dra. Isabelle Sucoski','Dra. Djanine Nascimentos','Dra. Indianara Masiero','Dr. Jhony Ross','Dra. Marcia Freitas','Matheus Foletto'];
+window.ALL_CLIENTS=['Podo. Juliana Carriel','Dr. Gabriel Machado','Dra. Halana Nicoletti','Dra. Marcelo Tanaka','Dra. Mariana Fernandes','Dra. Adila Taí','Dra. Ana Lydia','Dra. Karina Lima','Dra. Isabelle Sucoski','Dra. Djanine Nascimentos','Dra. Indianara Masiero','Dr. Jhony Ross','Dra. Marcia Freitas','Matheus Foletto'];
 
 function cSlug(n){return n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 window.clientSlug=cSlug;
@@ -879,6 +920,7 @@ function startApp(u){
   loadAvisos();
   populateRepCliente();
   loadTeamGrid();
+  loadRanking();
   subscribeChat();
   loadScripts();
   loadChecklistIfAdmin();
@@ -945,7 +987,11 @@ function renderCal(){
     const key=`${y}-${String(m+1).padStart(2,'0')}-${String(d2).padStart(2,'0')}`;
     const isToday=today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d2;
     const hasEv=calEvents[key]&&calEvents[key].length>0;
-    html+=`<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="openEventModal('${key}',${d2})">${d2}</div>`;
+    const bdKey=`${m+1}-${d2}`;
+    const hasBd=window._calBirthdays&&window._calBirthdays[bdKey];
+    html+=`<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="openEventModal('${key}',${d2})" title="${hasBd?'🎂 '+window._calBirthdays[bdKey].join(', '):''}">
+      ${d2}${hasBd?`<span style="font-size:9px;display:block;line-height:1;margin-top:1px;">🎂</span>`:''}
+    </div>`;
   }
   const remaining=(7-((first+days)%7))%7;
   for(let i=1;i<=remaining;i++)html+=`<div class="cal-day other-month">${i}</div>`;
@@ -1020,7 +1066,19 @@ window.copyReport=function(){
 window.saveReport=async function(){
   const d=new Date(),k=d.toISOString().split('T')[0];
   const cl=document.getElementById('rep-cliente').value;
-  await setDoc(doc(db,'daily_reports',`${currentUser.slug}_${k}_${cSlug(cl)}`),{user:currentUser.name,cliente:cl,date:k,text:window._repText,savedAt:serverTimestamp()});
+  const ag=parseInt(document.getElementById('rep-ag').value)||0;
+  await setDoc(doc(db,'daily_reports',`${currentUser.slug}_${k}_${cSlug(cl)}`),{user:currentUser.name,cliente:cl,date:k,text:window._repText,agendamentos:ag,savedAt:serverTimestamp()});
+  // Contabilizar agendamentos para ranking mensal
+  const mesKey=k.substring(0,7); // YYYY-MM
+  const rankRef=doc(db,'ranking',`${mesKey}_${currentUser.slug}`);
+  const rankSnap=await getDoc(rankRef);
+  const prev=rankSnap.exists()?rankSnap.data():{};
+  // Soma apenas este relatório específico (evita dupla contagem)
+  const repKey=`${k}_${cSlug(cl)}`;
+  const prevThisRep=(prev.reportKeys&&prev.reportKeys[repKey])||0;
+  const newTotal=(prev.total||0)-prevThisRep+ag;
+  const newKeys={...(prev.reportKeys||{}),[repKey]:ag};
+  await setDoc(rankRef,{user:currentUser.name,slug:currentUser.slug,mes:mesKey,total:newTotal,reportKeys:newKeys,updatedAt:serverTimestamp()});
   document.getElementById('last-report').textContent=window._repText||'—';
   showToast('Relatório salvo!','success');
 };
@@ -1152,9 +1210,12 @@ async function loadBirthdays(){
   const snap=await getDocs(collection(db,'clients'));
   const today=new Date();const tm=today.getMonth()+1,td=today.getDate();
   const upcoming=[];
+  const myClients=currentUser?.isAdmin?null:currentUser?.clients?.map(c=>c.toLowerCase());
   snap.forEach(d=>{
     const c=d.data();
     if(!c.nasc)return;
+    // Colaboradora filtra só seus clientes
+    if(myClients&&!myClients.some(mc=>c.nome&&c.nome.toLowerCase().includes(mc.replace(/dra?\.\s*/i,'').trim())))return;
     const[y,m,day]=c.nasc.split('-').map(Number);
     const diff=(m-tm)*30+(day-td);
     if(diff>=0&&diff<=30)upcoming.push({nome:c.nome,m,day,diff});
@@ -1169,19 +1230,71 @@ async function loadBirthdays(){
         <div style="font-size:12px;color:var(--text3);">${b.day.toString().padStart(2,'0')}/${b.m.toString().padStart(2,'0')} · ${b.diff===0?'Hoje! 🎉':b.diff===1?'Amanhã':`Em ${b.diff} dias`}</div>
       </div>
     </div>`).join(''):`<div class="empty-state"><i class="ti ti-cake"></i>Nenhum aniversário nos próximos 30 dias.</div>`;
+  // Injetar aniversários no calendário
+  await injectBirthdaysInCalendar(snap);
+}
+
+async function injectBirthdaysInCalendar(snap){
+  // Marca os dias do calendário com bolo se houver aniversário nesse dia/mês
+  const myClients=currentUser?.isAdmin?null:currentUser?.clients?.map(c=>c.toLowerCase());
+  const birthdays={};
+  snap.forEach(d=>{
+    const c=d.data();
+    if(!c.nasc)return;
+    if(myClients&&!myClients.some(mc=>c.nome&&c.nome.toLowerCase().includes(mc.replace(/dra?\.\s*/i,'').trim())))return;
+    const[y,mo,day]=c.nasc.split('-').map(Number);
+    const key=`${mo}-${day}`;
+    if(!birthdays[key])birthdays[key]=[];
+    birthdays[key].push(c.nome);
+  });
+  window._calBirthdays=birthdays;
+  renderCal(); // re-renderiza calendário com os aniversários
+}
+
+// ═══ RANKING / DESTAQUE ═══
+async function loadRanking(){
+  const mesKey=new Date().toISOString().substring(0,7);
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mesNome=meses[parseInt(mesKey.split('-')[1])-1];
+  const snap=await getDocs(collection(db,'ranking'));
+  const dados=[];
+  snap.forEach(d=>{const r=d.data();if(r.mes===mesKey)dados.push(r);});
+  dados.sort((a,b)=>b.total-a.total);
+  window._rankingData=dados;
+  const destaqueCard=document.getElementById('destaque-mes-card');
+  const dashDestaque=document.getElementById('dash-destaque');
+  if(dados.length>0&&dados[0].total>0){
+    const top=dados[0];
+    if(destaqueCard){
+      document.getElementById('destaque-nome').textContent=top.user;
+      document.getElementById('destaque-info').textContent=`Parabéns! 🎉 Melhor desempenho de ${mesNome}`;
+      document.getElementById('destaque-total').textContent=top.total;
+      destaqueCard.style.display='block';
+    }
+    if(dashDestaque){
+      document.getElementById('dash-destaque-txt').textContent=`${top.user} — ${top.total} agendamentos em ${mesNome} 🎉`;
+      dashDestaque.style.display='block';
+    }
+  }
 }
 
 // ═══ EQUIPE ═══
 async function loadTeamGrid(){
   const ps=await getDoc(doc(db,'settings','team_photos'));
   const photos=ps.exists()?ps.data():{};
+  const isAdmin=currentUser?.isAdmin;
   document.getElementById('team-grid').innerHTML=TEAM.map(u=>{
     const p=photos[u.slug];
+    // Se não é admin, mostrar clientes só da colaboradora logada
+    const showClients=isAdmin||u.slug===currentUser?.slug;
+    const clientBadges=showClients
+      ?u.clients.slice(0,3).map(c=>`<span class="badge badge-blue">${c.replace('Dra.','').replace('Dr.','').trim()}</span>`).join('')+(u.clients.length>3?`<span class="badge badge-gray">+${u.clients.length-3}</span>`:'')
+      :`<span style="font-size:12px;color:var(--text3);">—</span>`;
     return`<div class="team-card">
       <div class="team-avatar">${p?`<img src="${p}" alt="${u.name}" onerror="this.style.display='none'">`:`<span>${u.name[0].toUpperCase()}</span>`}</div>
       <div class="team-name">${u.name}</div>
       <div class="team-role">${u.isAdmin?'✦ Admin':'Colaboradora'}</div>
-      <div class="team-clients-wrap">${u.clients.slice(0,3).map(c=>`<span class="badge badge-blue">${c.replace('Dra.','').replace('Dr.','').trim()}</span>`).join('')}${u.clients.length>3?`<span class="badge badge-gray">+${u.clients.length-3}</span>`:''}</div>
+      <div class="team-clients-wrap">${clientBadges}</div>
     </div>`;
   }).join('');
 }
@@ -1219,20 +1332,32 @@ window.sendChat=async function(){
 function loadScripts(){
   const q=query(collection(db,'scripts'),orderBy('createdAt','desc'));
   onSnapshot(q,snap=>{
-    const scripts=[];snap.forEach(d=>scripts.push({id:d.id,...d.data()}));
-    document.getElementById('scripts-list').innerHTML=scripts.length?scripts.map(s=>`
-      <div class="script-card" onclick="viewScript('${encodeURIComponent(s.title)}','${encodeURIComponent(s.body||'')}')">
-        <div class="script-card-title">${s.title}</div>
-        <div class="script-card-preview">${(s.body||'').substring(0,100)}${(s.body||'').length>100?'...':''}</div>
-      </div>`).join(''):`<div class="empty-state"><i class="ti ti-message-2-text"></i>Nenhum script cadastrado.</div>`;
+    window._allScripts=[];snap.forEach(d=>window._allScripts.push({id:d.id,...d.data()}));
+    const activeBtn=document.querySelector('.script-tab-btn.active');
+    const cat=activeBtn?activeBtn.dataset.cat:'Atendimento WhatsApp';
+    renderScriptsByCat(cat);
   });
 }
+function renderScriptsByCat(cat){
+  const scripts=(window._allScripts||[]).filter(s=>(s.categoria||'Atendimento WhatsApp')===cat);
+  document.getElementById('scripts-list').innerHTML=scripts.length?scripts.map(s=>`
+    <div class="script-card" onclick="viewScript('${encodeURIComponent(s.title)}','${encodeURIComponent(s.body||'')}')">
+      <div class="script-card-title">${s.title}</div>
+      <div class="script-card-preview">${(s.body||'').substring(0,100)}${(s.body||'').length>100?'...':''}</div>
+    </div>`).join(''):`<div class="empty-state"><i class="ti ti-message-2-text"></i>Nenhum script nesta categoria.</div>`;
+}
+window.filterScripts=function(btn,cat){
+  document.querySelectorAll('.script-tab-btn').forEach(b=>{b.className='btn btn-ghost script-tab-btn';});
+  btn.className='btn btn-primary script-tab-btn active';
+  renderScriptsByCat(cat);
+};
 window.openScriptModal=function(){document.getElementById('modal-script').classList.add('open');};
 window.saveScript=async function(){
   const t=document.getElementById('sc-title').value.trim();
   const b=document.getElementById('sc-body').value.trim();
+  const cat=document.getElementById('sc-cat').value;
   if(!t||!b)return;
-  await addDoc(collection(db,'scripts'),{title:t,body:b,author:currentUser.name,createdAt:serverTimestamp()});
+  await addDoc(collection(db,'scripts'),{title:t,body:b,categoria:cat,author:currentUser.name,createdAt:serverTimestamp()});
   document.getElementById('sc-title').value='';
   document.getElementById('sc-body').value='';
   closeModal('modal-script');
@@ -1298,7 +1423,7 @@ let ytPlayer=null;
 window.onYouTubeIframeAPIReady=function(){window._ytReady=true;createYT();};
 async function loadYT(){
   const snap=await getDoc(doc(db,'settings','youtube'));
-  window._ytVid=snap.exists()?snap.data().videoId:'qJsNuDJoVxg';
+  window._ytVid=snap.exists()?snap.data().videoId:'gwBJUM0zPsg';
   if(document.getElementById('yt-url-input'))document.getElementById('yt-url-input').value=window._ytVid;
   if(!window.YT){const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);}
   else createYT();
@@ -1307,7 +1432,7 @@ function createYT(){
   if(!window.YT?.Player)return;
   const wrap=document.getElementById('yt-player-wrap');
   wrap.innerHTML='<div id="yt-el"></div>';
-  ytPlayer=new YT.Player('yt-el',{height:'1',width:'1',videoId:window._ytVid||'qJsNuDJoVxg',playerVars:{autoplay:0,rel:0},events:{onReady:()=>{document.getElementById('mini-player').classList.add('visible');renderMpControls();},onStateChange:()=>renderMpControls()}});
+  ytPlayer=new YT.Player('yt-el',{height:'1',width:'1',videoId:window._ytVid||'gwBJUM0zPsg',playerVars:{autoplay:0,rel:0},events:{onReady:()=>{document.getElementById('mini-player').classList.add('visible');renderMpControls();},onStateChange:()=>renderMpControls()}});
 }
 function renderMpControls(){
   const isAdmin=currentUser?.isAdmin;
@@ -1317,6 +1442,22 @@ function renderMpControls(){
     ${isAdmin?`<button class="mp-btn" onclick="ytPrev()" title="Anterior"><i class="ti ti-player-skip-back"></i></button>`:''}
     <button class="mp-btn play" onclick="ytPlayPause()"><i class="ti ti-player-${playing?'pause':'play'}"></i></button>
     ${isAdmin?`<button class="mp-btn" onclick="ytNext()" title="Próxima"><i class="ti ti-player-skip-forward"></i></button>`:''}`;
+  // Atualizar thumbnail do vídeo atual
+  try{
+    const vid=ytPlayer&&ytPlayer.getVideoData?ytPlayer.getVideoData().video_id:null;
+    const thumbEl=document.getElementById('mp-thumb-inner');
+    const titleEl=document.getElementById('mp-title');
+    if(vid&&thumbEl){
+      thumbEl.style.backgroundImage=`url(https://img.youtube.com/vi/${vid}/mqdefault.jpg)`;
+      thumbEl.style.backgroundSize='cover';
+      thumbEl.style.backgroundPosition='center';
+      thumbEl.style.background='';
+    }
+    if(vid&&titleEl){
+      const data=ytPlayer.getVideoData();
+      if(data&&data.title)titleEl.textContent=data.title;
+    }
+  }catch(e){}
 }
 function ytIsPlaying(){try{return ytPlayer&&ytPlayer.getPlayerState()===1;}catch(e){return false;}}
 window.ytPlayPause=function(){try{ytIsPlaying()?ytPlayer.pauseVideo():ytPlayer.playVideo();setTimeout(renderMpControls,300);}catch(e){}};
@@ -1401,17 +1542,53 @@ async function loadConfigTeam(){
   const ps=await getDoc(doc(db,'settings','team_photos'));
   const photos=ps.exists()?ps.data():{};
   document.getElementById('config-team').innerHTML=TEAM.map(u=>`
-    <div class="member-config-row">
-      <div class="member-config-avatar">${u.name[0].toUpperCase()}</div>
+    <div class="member-config-row" id="row-${u.slug}">
+      <div class="member-config-avatar" id="cfg-avatar-${u.slug}" style="${photos[u.slug]?`background-image:url('${photos[u.slug]}');background-size:cover;background-position:center;`:''}">${photos[u.slug]?'':u.name[0].toUpperCase()}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${u.name} <span style="font-size:11px;color:var(--text3);">(${u.role})</span></div>
-        <input type="text" class="input" id="photo-${u.slug}" placeholder="URL da foto..." value="${photos[u.slug]||''}" style="font-size:12px;padding:7px 10px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;">${u.name} <span style="font-size:11px;color:var(--text3);">(${u.role})</span></div>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;padding:7px 12px;background:var(--surface2);border-radius:8px;border:1px dashed var(--border);transition:border-color .2s;"
+          ondragover="event.preventDefault();this.style.borderColor='#5B7FA6'"
+          ondragleave="this.style.borderColor=''"
+          ondrop="handlePhotoDrop(event,'${u.slug}')">
+          <i class="ti ti-upload" style="font-size:14px;color:var(--text3);"></i>
+          Arrastar foto ou clique para selecionar
+          <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoFile(event,'${u.slug}')">
+        </label>
+        <div id="photo-preview-${u.slug}" style="font-size:11px;color:var(--success);margin-top:4px;display:none;">✓ Foto carregada</div>
       </div>
     </div>`).join('')+`<button class="btn btn-primary" style="margin-top:12px;" onclick="savePhotos()"><i class="ti ti-device-floppy"></i> Salvar fotos</button>`;
 }
+window._pendingPhotos={};
+window.handlePhotoFile=function(e,slug){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    window._pendingPhotos[slug]=ev.target.result;
+    const av=document.getElementById(`cfg-avatar-${slug}`);
+    if(av){av.style.backgroundImage=`url('${ev.target.result}')`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.textContent='';}
+    const prev=document.getElementById(`photo-preview-${slug}`);
+    if(prev)prev.style.display='block';
+  };
+  r.readAsDataURL(file);
+};
+window.handlePhotoDrop=function(e,slug){
+  e.preventDefault();
+  const file=e.dataTransfer.files[0];if(!file||!file.type.startsWith('image/'))return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    window._pendingPhotos[slug]=ev.target.result;
+    const av=document.getElementById(`cfg-avatar-${slug}`);
+    if(av){av.style.backgroundImage=`url('${ev.target.result}')`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.textContent='';}
+    const prev=document.getElementById(`photo-preview-${slug}`);
+    if(prev)prev.style.display='block';
+  };
+  r.readAsDataURL(file);
+};
 window.savePhotos=async function(){
-  const p={};
-  TEAM.forEach(u=>{const v=document.getElementById('photo-'+u.slug)?.value.trim();if(v)p[u.slug]=v;});
+  const ps=await getDoc(doc(db,'settings','team_photos'));
+  const p=ps.exists()?ps.data():{};
+  Object.assign(p,window._pendingPhotos);
+  window._pendingPhotos={};
   await setDoc(doc(db,'settings','team_photos'),p);
   loadTeamGrid();showToast('Fotos atualizadas!','success');
 };
