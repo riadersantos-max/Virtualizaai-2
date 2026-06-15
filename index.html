@@ -99,6 +99,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-item:hover{color:var(--sidebar-text);background:var(--sidebar-hover);}
 .nav-item.active{color:var(--sidebar-accent);background:var(--sidebar-active);border-left-color:#5B7FA6;font-weight:500;}
 .nav-item.active i{color:var(--sidebar-accent);}
+.nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#C94040;color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px;min-width:16px;text-align:center;line-height:16px;}
 .admin-only{display:none;}
 .is-admin .admin-only{display:flex;}
 .sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--sidebar-border);}
@@ -296,7 +297,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .member-config-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4A6FA5,#3D5F8F);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;flex-shrink:0;}
 
 /* ── MINI PLAYER ── */
-#mini-player{position:fixed;bottom:20px;left:16px;width:280px;background:var(--night);border:1px solid rgba(91,127,166,0.2);border-radius:14px;padding:12px;z-index:500;box-shadow:0 8px 32px rgba(10,13,30,0.4);display:none;}
+#mini-player{position:fixed;bottom:20px;left:16px;width:280px;background:var(--night);border:1px solid rgba(91,127,166,0.2);border-radius:14px;padding:12px;z-index:90;box-shadow:0 8px 32px rgba(10,13,30,0.4);display:none;}
 #mini-player.visible{display:block;}
 .mp-inner{display:flex;align-items:center;gap:10px;}
 .mp-thumb{width:42px;height:42px;border-radius:8px;background:rgba(91,127,166,0.2);overflow:hidden;flex-shrink:0;}
@@ -396,7 +397,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="nav-section">
       <div class="nav-label">Principal</div>
-      <div class="nav-item active" data-page="dashboard"><i class="ti ti-layout-dashboard"></i><span>Início</span></div>
+      <div class="nav-item active" data-page="dashboard"><i class="ti ti-layout-dashboard"></i><span>Início</span><span class="nav-badge" id="nav-badge-avisos" style="display:none;"></span></div>
       <div class="nav-item" data-page="relatorio"><i class="ti ti-clipboard-text"></i><span>Relatório diário</span></div>
       <div class="nav-item" data-page="clientes"><i class="ti ti-users"></i><span>Clientes</span></div>
     </div>
@@ -409,6 +410,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="nav-section">
       <div class="nav-label">Admin</div>
+      <div class="nav-item admin-only" data-page="painel-admin"><i class="ti ti-layout-columns"></i><span>Painel Admin</span></div>
+      <div class="nav-item admin-only" data-page="performance"><i class="ti ti-trending-up"></i><span>Performance</span></div>
       <div class="nav-item admin-only" data-page="checklist"><i class="ti ti-checklist"></i><span>Checklist</span></div>
       <div class="nav-item admin-only" data-page="cliente-relatorio"><i class="ti ti-chart-line"></i><span>Rel. cliente</span></div>
       <div class="nav-item admin-only" data-page="configuracoes"><i class="ti ti-settings-2"></i><span>Configurações</span></div>
@@ -638,7 +641,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div id="trein-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:4px;"></div>
     </div>
 
-        <!-- CHECKLIST (admin) -->
+        <!-- PAINEL ADMIN -->
+    <div class="page" id="page-painel-admin">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div><h2><i class="ti ti-layout-columns" style="font-size:22px;vertical-align:middle;margin-right:8px;color:#5B7FA6;"></i>Painel Admin</h2><p>Visão consolidada da equipe — <span id="admin-panel-mes"></span></p></div>
+      </div>
+      <!-- Cards de metas da semana -->
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div class="card-label">🎯 Metas da semana</div>
+          <button class="btn btn-ghost btn-sm" onclick="openMetaModal()"><i class="ti ti-pencil"></i> Definir metas</button>
+        </div>
+        <div id="metas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
+      </div>
+      <!-- Visão consolidada -->
+      <div class="card-label" style="margin-bottom:12px;">📊 Relatórios do mês</div>
+      <div id="admin-equipe-grid" style="display:grid;gap:12px;margin-bottom:20px;"></div>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div class="page" id="page-performance">
+      <div class="page-header">
+        <div><h2><i class="ti ti-trending-up" style="font-size:22px;vertical-align:middle;margin-right:8px;color:#5B7FA6;"></i>Performance</h2><p>Histórico de agendamentos por colaboradora</p></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap;">
+        <label class="field-label" style="margin:0;">Colaboradora:</label>
+        <select class="select" id="perf-user" onchange="loadPerformance()" style="min-width:180px;"></select>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-label" style="margin-bottom:12px;">Agendamentos por mês (últimos 6 meses)</div>
+        <canvas id="perf-chart" height="120"></canvas>
+      </div>
+      <div id="perf-table" style="display:grid;gap:8px;"></div>
+    </div>
+
+    <!-- CHECKLIST (admin) -->
     <div class="page" id="page-checklist">
       <div class="page-header"><h2>Checklist</h2><p>Tarefas do dia — reinicia toda manhã automaticamente</p></div>
       <div class="card" style="max-width:600px;">
@@ -778,7 +815,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 <!-- MINI PLAYER -->
 <div id="mini-player">
-  <div class="mp-inner">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:4px;">
+    <button onclick="toggleMpCollapse()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.3);font-size:11px;padding:0;" title="Minimizar"><i class="ti ti-chevron-down" id="mp-chevron"></i></button>
+  </div>
+  <div class="mp-inner" id="mp-body">
     <div class="mp-thumb"><div id="mp-thumb-inner" style="width:100%;height:100%;background:rgba(91,127,166,0.3);"></div></div>
     <div class="mp-info">
       <div class="mp-title" id="mp-title">Playlist da equipe</div>
@@ -845,6 +885,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-trein')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveTreinamento()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL METAS -->
+<div class="modal-overlay" id="modal-meta">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <div class="modal-title">🎯 Definir metas da semana</div>
+      <button class="modal-close" onclick="closeModal('modal-meta')"><i class="ti ti-x"></i></button>
+    </div>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:14px;">Meta de agendamentos para esta semana por colaboradora.</p>
+    <div id="meta-fields" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-meta')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMetas()"><i class="ti ti-device-floppy"></i> Salvar</button>
     </div>
   </div>
 </div>
@@ -1115,6 +1171,13 @@ function loadAvisos(){
     const items=[];snap.forEach(d=>items.push({id:d.id,...d.data()}));
     const pinned=items.filter(a=>a.pinned),rest=items.filter(a=>!a.pinned);
     const all=[...pinned,...rest].slice(0,8);
+    // Badge: conta avisos fixados (sempre visível como alerta)
+    const badge=document.getElementById('nav-badge-avisos');
+    if(badge){
+      const pinnedCount=pinned.length;
+      if(pinnedCount>0){badge.textContent=pinnedCount;badge.style.display='inline-block';}
+      else{badge.style.display='none';}
+    }
     const el=document.getElementById('dash-avisos');
     el.innerHTML=all.length?all.map(a=>`
       <div class="aviso-item">
@@ -1636,6 +1699,12 @@ function renderMpControls(){
   }catch(e){}
 }
 function ytIsPlaying(){try{return ytPlayer&&ytPlayer.getPlayerState()===1;}catch(e){return false;}}
+window.toggleMpCollapse=function(){
+  const body=document.getElementById('mp-body');
+  const chev=document.getElementById('mp-chevron');
+  if(body.style.display==='none'){body.style.display='flex';chev.className='ti ti-chevron-down';}
+  else{body.style.display='none';chev.className='ti ti-chevron-up';}
+};
 window.ytPlayPause=function(){try{ytIsPlaying()?ytPlayer.pauseVideo():ytPlayer.playVideo();setTimeout(renderMpControls,300);}catch(e){}};
 window.ytNext=function(){try{ytPlayer.nextVideo();setTimeout(renderMpControls,300);}catch(e){}};
 window.ytPrev=function(){try{ytPlayer.previousVideo();setTimeout(renderMpControls,300);}catch(e){}};
@@ -2034,6 +2103,159 @@ async function renderCrChart(slug,mes,ano){
     {label:mn[parseInt(mes)-1]+'/'+String(ano).slice(-2),data:dataAt,backgroundColor:'rgba(91,127,166,0.7)',borderColor:'#5B7FA6',borderWidth:1.5,borderRadius:4}
   ]},options:{responsive:true,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
 }
+
+
+// ═══ PAINEL ADMIN ═══
+async function loadPainelAdmin(){
+  const mesKey=new Date().toISOString().substring(0,7);
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mesNome=meses[parseInt(mesKey.split('-')[1])-1];
+  const el=document.getElementById('admin-panel-mes');
+  if(el)el.textContent=mesNome+' '+mesKey.split('-')[0];
+
+  // Busca todos os relatórios do mês
+  const snap=await getDocs(collection(db,'daily_reports'));
+  const relMes={};
+  const today=new Date().toISOString().split('T')[0];
+  snap.forEach(d=>{
+    const r=d.data();
+    if(!r.date||!r.date.startsWith(mesKey))return;
+    if(!relMes[r.user])relMes[r.user]={relatorios:new Set(),agendamentos:0,dias:new Set()};
+    relMes[r.user].relatorios.add(r.date+'_'+r.cliente);
+    relMes[r.user].agendamentos+=(r.agendamentos||0);
+    relMes[r.user].dias.add(r.date);
+  });
+
+  // Busca metas da semana
+  const metaSnap=await getDoc(doc(db,'settings','metas_semana'));
+  const metas=metaSnap.exists()?metaSnap.data():{};
+
+  // Dias úteis do mês até hoje
+  const diasUteisAte=[];
+  const dInit=new Date(mesKey+'-01');
+  const dFim=new Date(today);
+  for(let d=new Date(dInit);d<=dFim;d.setDate(d.getDate()+1)){
+    if(d.getDay()!==0&&d.getDay()!==6)diasUteisAte.push(d.toISOString().split('T')[0]);
+  }
+
+  // Metas grid
+  const metasGrid=document.getElementById('metas-grid');
+  if(metasGrid){
+    metasGrid.innerHTML=TEAM.filter(u=>!u.isAdmin&&(u.status||'ativo')!=='inativo').map(u=>{
+      const meta=metas[u.slug]||5;
+      const dados=relMes[u.name]||{agendamentos:0};
+      const ag=dados.agendamentos;
+      const pct=Math.min(Math.round(ag/meta*100),100);
+      const bateu=ag>=meta;
+      return`<div class="card" style="padding:14px;border:1px solid ${bateu?'var(--success)':'var(--border)'};position:relative;">
+        ${bateu?'<span style="position:absolute;top:10px;right:10px;font-size:18px;">✅</span>':''}
+        <div style="font-weight:600;font-size:13px;margin-bottom:2px;">${u.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">${ag} / ${meta} agendamentos</div>
+        <div style="background:var(--surface2);border-radius:99px;height:7px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${bateu?'var(--success)':'#5B7FA6'};border-radius:99px;transition:width 0.4s;"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Grid equipe consolidado
+  const grid=document.getElementById('admin-equipe-grid');
+  if(!grid)return;
+  grid.innerHTML=TEAM.filter(u=>!u.isAdmin&&(u.status||'ativo')!=='inativo').map(u=>{
+    const dados=relMes[u.name]||{relatorios:new Set(),agendamentos:0,dias:new Set()};
+    const totalRel=dados.relatorios.size;
+    const totalAg=dados.agendamentos;
+    const diasComRel=dados.dias.size;
+    const diasSemRel=diasUteisAte.filter(d=>!dados.dias.has(d)).length;
+    const alertColor=diasSemRel>2?'var(--danger)':diasSemRel>0?'var(--warn)':'var(--success)';
+    return`<div class="card" style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:16px 20px;">
+      <div>
+        <div style="font-weight:600;font-size:14px;margin-bottom:6px;">${u.name} <span style="font-size:11px;color:var(--text3);font-weight:400;">${u.role}</span></div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+          <div><span style="font-size:11px;color:var(--text3);">Relatórios</span><div style="font-size:17px;font-weight:700;color:var(--night);">${totalRel}</div></div>
+          <div><span style="font-size:11px;color:var(--text3);">Agendamentos</span><div style="font-size:17px;font-weight:700;color:#5B7FA6;">${totalAg}</div></div>
+          <div><span style="font-size:11px;color:var(--text3);">Dias ativos</span><div style="font-size:17px;font-weight:700;color:var(--success);">${diasComRel}</div></div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:var(--text3);">Dias sem relatório</div>
+        <div style="font-size:24px;font-weight:800;color:${alertColor};">${diasSemRel}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openMetaModal=function(){
+  const metaFields=document.getElementById('meta-fields');
+  if(!metaFields)return;
+  getDoc(doc(db,'settings','metas_semana')).then(snap=>{
+    const metas=snap.exists()?snap.data():{};
+    metaFields.innerHTML=TEAM.filter(u=>!u.isAdmin&&(u.status||'ativo')!=='inativo').map(u=>`
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:13px;font-weight:500;flex:1;">${u.name}</div>
+        <input type="number" class="input" id="meta-${u.slug}" value="${metas[u.slug]||5}" min="1" style="width:80px;text-align:center;">
+        <span style="font-size:12px;color:var(--text3);">agend.</span>
+      </div>`).join('');
+    document.getElementById('modal-meta').classList.add('open');
+  });
+};
+window.saveMetas=async function(){
+  const metas={};
+  TEAM.filter(u=>!u.isAdmin).forEach(u=>{
+    const el=document.getElementById('meta-'+u.slug);
+    if(el)metas[u.slug]=parseInt(el.value)||5;
+  });
+  await setDoc(doc(db,'settings','metas_semana'),metas);
+  closeModal('modal-meta');
+  loadPainelAdmin();
+  showToast('Metas salvas!','success');
+};
+
+// ═══ PERFORMANCE ═══
+async function initPerformance(){
+  const sel=document.getElementById('perf-user');
+  if(!sel)return;
+  sel.innerHTML=TEAM.filter(u=>!u.isAdmin&&(u.status||'ativo')!=='inativo').map(u=>`<option value="${u.name}">${u.name}</option>`).join('');
+  loadPerformance();
+}
+window.loadPerformance=async function(){
+  const userName=document.getElementById('perf-user')?.value;
+  if(!userName)return;
+  // Últimos 6 meses
+  const meses=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date();d.setMonth(d.getMonth()-i);
+    meses.push(d.toISOString().substring(0,7));
+  }
+  const mn=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  // Busca ranking de cada mês
+  const snap=await getDocs(collection(db,'ranking'));
+  const rankMap={};
+  snap.forEach(d=>{const r=d.data();if(r.user===userName)rankMap[r.mes]=r.total||0;});
+  const labels=meses.map(m=>mn[parseInt(m.split('-')[1])-1]+'/'+m.split('-')[0].slice(-2));
+  const data=meses.map(m=>rankMap[m]||0);
+  // Gráfico
+  const canvas=document.getElementById('perf-chart');
+  if(canvas){
+    if(window._perfChart)window._perfChart.destroy();
+    const Chart=window.Chart;
+    if(Chart){
+      window._perfChart=new Chart(canvas,{type:'bar',data:{labels,datasets:[{label:'Agendamentos feitos',data,backgroundColor:'rgba(91,127,166,0.7)',borderColor:'#5B7FA6',borderWidth:2,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:11},stepSize:1}}}}});
+    }
+  }
+  // Tabela detalhada
+  const table=document.getElementById('perf-table');
+  if(table){
+    table.innerHTML=meses.map((m,i)=>{
+      const val=rankMap[m]||0;
+      const mesLabel=labels[i];
+      return`<div class="card" style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;">
+        <div style="font-size:13px;font-weight:500;color:var(--night);">${mesLabel}</div>
+        <div style="font-size:18px;font-weight:700;color:${val>0?'#5B7FA6':'var(--text3)'};">${val} <span style="font-size:12px;font-weight:400;color:var(--text3);">agendamentos</span></div>
+      </div>`;
+    }).reverse().join('');
+  }
+};
 
 // ═══ PORTAL CLIENTE ═══
 async function loadClientPortal(slug){
