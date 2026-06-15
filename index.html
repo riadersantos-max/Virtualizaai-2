@@ -493,9 +493,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
               <i class="ti ti-clipboard-text" style="font-size:20px;color:#5B7FA6;"></i>
               <div><div style="font-size:13px;font-weight:600;color:var(--night);">Relatório diário</div><div style="font-size:11px;color:var(--text3);">Preencher e enviar</div></div>
             </div>
-            <div onclick="navTo('clientes')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2dfd9'" onmouseout="this.style.background='var(--surface2)'">
-              <i class="ti ti-users" style="font-size:20px;color:#2E9E6A;"></i>
-              <div><div style="font-size:13px;font-weight:600;color:var(--night);">Clientes</div><div style="font-size:11px;color:var(--text3);">Ver e gerenciar</div></div>
+            <div onclick="navTo('reuniao')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2dfd9'" onmouseout="this.style.background='var(--surface2)'">
+              <i class="ti ti-video" style="font-size:20px;color:#2E9E6A;"></i>
+              <div><div style="font-size:13px;font-weight:600;color:var(--night);">Reunião</div><div style="font-size:11px;color:var(--text3);">Sala da equipe</div></div>
             </div>
             <div onclick="navTo('scripts')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2dfd9'" onmouseout="this.style.background='var(--surface2)'">
               <i class="ti ti-message-2-text" style="font-size:20px;color:#B87820;"></i>
@@ -537,9 +537,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <div><label class="field-label">Em conversa</label><input type="number" class="input" id="rep-conv" min="0" value="0"></div>
           </div>
           <div><label class="field-label">Detalhes confirmados (um por linha)</label><textarea class="textarea" id="rep-conf-nomes" placeholder="Felipe Marcilican – Estética íntima – 12/07"></textarea></div>
-          <div class="rep-row">
-            <div><label class="field-label">Procedimentos realizados</label><input type="number" class="input" id="rep-prcd" min="0" value="0"></div>
-          </div>
           <div><label class="field-label">Observações</label><textarea class="textarea" id="rep-obs" placeholder="Pontos de melhoria..."></textarea></div>
           <div style="display:flex;gap:10px;align-items:center;">
             <button class="btn btn-primary" onclick="copyReport()"><i class="ti ti-copy"></i> Copiar</button>
@@ -620,7 +617,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <!-- SCRIPTS -->
     <div class="page" id="page-scripts">
       <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
-        <div><h2>Scripts</h2><p>Textos prontos para o atendimento</p></div>
+        <div><h2><i class="ti ti-message-2-text" style="font-size:24px;vertical-align:middle;margin-right:8px;color:#5B7FA6;"></i>Scripts</h2><p>Textos prontos para o atendimento</p></div>
         <button class="btn btn-primary admin-only" onclick="openScriptModal()"><i class="ti ti-plus"></i> Novo script</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="script-tabs">
@@ -1221,7 +1218,7 @@ function populateRepCliente(){
   const cl=currentUser.isAdmin?ALL_CLIENTS:currentUser.clients;
   s.innerHTML=cl.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
-['rep-rec','rep-fu','rep-ig','rep-ag','rep-nomes','rep-conf','rep-conf-nomes','rep-conv','rep-prcd','rep-obs','rep-cliente'].forEach(id=>{
+['rep-rec','rep-fu','rep-ig','rep-ag','rep-nomes','rep-conf','rep-conf-nomes','rep-conv','rep-obs','rep-cliente'].forEach(id=>{
   setTimeout(()=>{const el=document.getElementById(id);if(el)el.addEventListener('input',updatePreview);},500);
 });
 function updatePreview(){
@@ -1235,13 +1232,12 @@ function updatePreview(){
   const confNomesRaw=(document.getElementById('rep-conf-nomes')?.value||'').trim();
   const confL=confNomesRaw?confNomesRaw.split('\n').map(l=>'• '+l.trim()).join('\n'):'';
   const conf=get('rep-conf');
-  const t=`*📋 FEEDBACK DO DIA – ${dd}/${mm}*\n\n📩 Mensagens recebidas de anúncios: ${get('rep-rec')}\n\n💬 Mensagens enviadas (follow-up): ${get('rep-fu')}\n\n📱 Leads Instagram: ${get('rep-ig')}\n\n📅 Agendamentos feitos: ${get('rep-ag')}\n${nomesL}\n\n🗓️ Agendamentos confirmados (amanhã): ${conf}${confL?'\n'+confL:''}\n\n🔁 Pessoas em conversa (ainda sem agendamento): ${get('rep-conv')}\n\n✅ Procedimentos realizados: ${get('rep-prcd')}\n\n💡 Observações / pontos de melhoria do dia:\n${obsL}`;
+  const t=`*📋 FEEDBACK DO DIA – ${dd}/${mm}*\n\n📩 Mensagens recebidas de anúncios: ${get('rep-rec')}\n\n💬 Mensagens enviadas (follow-up): ${get('rep-fu')}\n\n📱 Leads Instagram: ${get('rep-ig')}\n\n📅 Agendamentos feitos: ${get('rep-ag')}\n${nomesL}\n\n🗓️ Agendamentos confirmados (amanhã): ${conf}${confL?'\n'+confL:''}\n\n🔁 Pessoas em conversa (ainda sem agendamento): ${get('rep-conv')}\n\n💡 Observações / pontos de melhoria do dia:\n${obsL}`;
   document.getElementById('report-preview').textContent=t;
   window._repText=t;
   document.getElementById('stat-leads').textContent=get('rep-ig');
   document.getElementById('stat-agenda').textContent=get('rep-ag');
   document.getElementById('stat-fu').textContent=get('rep-fu');
-  document.getElementById('stat-proc').textContent=get('rep-prcd');
 }
 window.copyReport=function(){
   navigator.clipboard.writeText(window._repText||'').then(()=>{
