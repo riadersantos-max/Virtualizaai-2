@@ -462,12 +462,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             </div>
           </div>
           <!-- Destaque do mês — discreto, abaixo dos avisos -->
-          <div id="dash-destaque" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:none;">
+          <div id="dash-destaque" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:18px;">🏆</span>
               <div>
                 <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text3);">Destaque do mês</div>
-                <div id="dash-destaque-txt" style="font-size:13px;font-weight:600;color:var(--night);"></div>
+                <div id="dash-destaque-txt" style="font-size:13px;font-weight:600;color:var(--night);">Nenhum agendamento registrado ainda.</div>
               </div>
             </div>
           </div>
@@ -664,10 +664,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <!-- CONFIGURAÇÕES (admin) -->
     <div class="page" id="page-configuracoes">
       <div class="page-header"><h2>Configurações</h2><p>Gerencie equipe, clientes e preferências da plataforma</p></div>
+
       <div class="config-section">
-        <div class="config-section-title"><i class="ti ti-users"></i>Equipe</div>
+        <div class="config-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span><i class="ti ti-users"></i>Gestão de Equipe</span>
+          <button class="btn btn-primary btn-sm" onclick="openTeamModal()"><i class="ti ti-plus"></i> Nova colaboradora</button>
+        </div>
+        <div id="config-team-list" style="display:grid;gap:12px;"></div>
+      </div>
+
+      <div class="config-section">
+        <div class="config-section-title"><i class="ti ti-camera"></i>Fotos da equipe</div>
         <div id="config-team"></div>
       </div>
+
       <div class="config-section">
         <div class="config-section-title"><i class="ti ti-music"></i>Playlist</div>
         <div class="card" style="max-width:500px;display:flex;gap:10px;align-items:flex-end;">
@@ -719,6 +729,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="mp-controls" id="mp-controls"></div>
   </div>
   <div class="mp-hidden-player" id="yt-player-wrap"></div>
+</div>
+
+<!-- MODAL EQUIPE -->
+<div class="modal-overlay" id="modal-team">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-team-title">Nova colaboradora</div>
+      <button class="modal-close" onclick="closeModal('modal-team')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="tm-slug-orig">
+    <div class="form-row">
+      <div class="form-group-v"><label class="field-label">Nome</label><input type="text" class="input" id="tm-name" placeholder="Ex: Ana Silva"></div>
+      <div class="form-group-v"><label class="field-label">Senha</label><input type="text" class="input" id="tm-pw" placeholder="Ex: cola6"></div>
+    </div>
+    <div class="form-group-v"><label class="field-label">Cargo</label>
+      <select class="select" id="tm-role">
+        <option value="Colaboradora">Colaboradora</option>
+        <option value="Admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group-v"><label class="field-label">Clientes (um por linha)</label>
+      <textarea class="textarea" id="tm-clients" style="min-height:100px;" placeholder="Dra. Nome Cliente"></textarea>
+    </div>
+    <div class="form-group-v" id="tm-status-wrap" style="display:none;">
+      <label class="field-label">Status</label>
+      <select class="select" id="tm-status">
+        <option value="ativo">Ativo</option>
+        <option value="inativo">Inativo (não aparece no login)</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-team')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTeamMember()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODALS -->
@@ -856,10 +901,21 @@ function initLoginListeners(){
 
 // ═══ LOGIN ═══
 window.currentUser=null;
-window.doLogin=function(){
+window.doLogin=async function(){
   const n=document.getElementById('login-name').value.trim();
   const p=document.getElementById('login-pw').value;
-  const u=TEAM.find(x=>x.name.toLowerCase()===n.toLowerCase()&&x.pw===p);
+  // Busca membros atualizados do Firebase e merge com TEAM
+  try{
+    const snap=await getDocs(collection(db,'team_members'));
+    snap.forEach(d=>{
+      const fm=d.data();
+      if(fm.status==='inativo')return;
+      const idx=TEAM.findIndex(t=>t.slug===fm.slug);
+      if(idx>=0)TEAM[idx]={...TEAM[idx],...fm};
+      else TEAM.push(fm);
+    });
+  }catch(e){}
+  const u=TEAM.find(x=>x.name.toLowerCase()===n.toLowerCase()&&x.pw===p&&(x.status||'ativo')!=='inativo');
   if(!u){document.getElementById('login-error').style.display='block';return;}
   document.getElementById('login-error').style.display='none';
   currentUser=u;
@@ -926,7 +982,38 @@ function startApp(u){
   loadChecklistIfAdmin();
   loadYT();
   loadBirthdays();
-  if(u.isAdmin){populateCrSelects();loadConfigTeam();}
+  loadStatsRealtime();
+  if(u.isAdmin){populateCrSelects();loadConfigTeam();loadTeamManagement();}
+}
+
+// ═══ STATS TEMPO REAL ═══
+function loadStatsRealtime(){
+  const today=new Date().toISOString().split('T')[0];
+  const isAdmin=currentUser?.isAdmin;
+  // Busca todos os relatórios do dia, filtra por colaboradora se não for admin
+  const q=query(collection(db,'daily_reports'));
+  onSnapshot(q,snap=>{
+    let leads=0,ag=0,fu=0,prcd=0;
+    snap.forEach(d=>{
+      const r=d.data();
+      if(r.date!==today)return;
+      if(!isAdmin&&r.user!==currentUser?.name)return;
+      // Extrai valores do texto do relatório
+      const txt=r.text||'';
+      const mLeads=txt.match(/Leads Instagram: (\d+)/);
+      const mAg=txt.match(/Agendamentos confirmados: (\d+)/);
+      const mFu=txt.match(/Mensagens enviadas \(follow-up\): (\d+)/);
+      const mPrcd=txt.match(/Procedimentos realizados: (\d+)/);
+      if(mLeads)leads+=parseInt(mLeads[1]);
+      if(mAg)ag+=parseInt(mAg[1]);
+      if(mFu)fu+=parseInt(mFu[1]);
+      if(mPrcd)prcd+=parseInt(mPrcd[1]);
+    });
+    document.getElementById('stat-leads').textContent=leads||'0';
+    document.getElementById('stat-agenda').textContent=ag||'0';
+    document.getElementById('stat-fu').textContent=fu||'0';
+    document.getElementById('stat-proc').textContent=prcd||'0';
+  });
 }
 
 // ═══ AVISOS ═══
@@ -1262,19 +1349,19 @@ async function loadRanking(){
   dados.sort((a,b)=>b.total-a.total);
   window._rankingData=dados;
   const destaqueCard=document.getElementById('destaque-mes-card');
-  const dashDestaque=document.getElementById('dash-destaque');
+  const txtEl=document.getElementById('dash-destaque-txt');
   if(dados.length>0&&dados[0].total>0){
     const top=dados[0];
     if(destaqueCard){
       document.getElementById('destaque-nome').textContent=top.user;
-      document.getElementById('destaque-info').textContent=`Parabéns! 🎉 Melhor desempenho de ${mesNome}`;
+      document.getElementById('destaque-info').textContent='Parabéns! 🎉 Melhor desempenho de '+mesNome;
       document.getElementById('destaque-total').textContent=top.total;
       destaqueCard.style.display='block';
     }
-    if(dashDestaque){
-      document.getElementById('dash-destaque-txt').textContent=`${top.user} — ${top.total} agendamentos em ${mesNome} 🎉`;
-      dashDestaque.style.display='block';
-    }
+    if(txtEl)txtEl.textContent=top.user+' — '+top.total+' agendamentos em '+mesNome+' 🎉';
+  } else {
+    if(destaqueCard)destaqueCard.style.display='none';
+    if(txtEl)txtEl.textContent='Nenhum agendamento registrado ainda.';
   }
 }
 
@@ -1591,6 +1678,97 @@ window.savePhotos=async function(){
   window._pendingPhotos={};
   await setDoc(doc(db,'settings','team_photos'),p);
   loadTeamGrid();showToast('Fotos atualizadas!','success');
+};
+
+
+// ═══ GESTÃO DE EQUIPE (Firebase) ═══
+async function loadTeamManagement(){
+  const snap=await getDocs(collection(db,'team_members'));
+  const members=[];
+  snap.forEach(d=>members.push({id:d.id,...d.data()}));
+  // Merge com TEAM hardcoded para quem ainda não está no Firebase
+  const firebaseSlugs=members.map(m=>m.slug);
+  TEAM.forEach(t=>{
+    if(!firebaseSlugs.includes(t.slug)){
+      members.push({...t,status:'ativo',fromDefault:true});
+    }
+  });
+  const list=document.getElementById('config-team-list');
+  if(!list)return;
+  list.innerHTML=members.map(m=>`
+    <div class="card" style="display:flex;align-items:center;gap:14px;padding:14px 18px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--steel);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px;flex-shrink:0;">${m.name[0].toUpperCase()}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:14px;color:var(--night);">${m.name} ${m.status==='inativo'?'<span style="font-size:11px;color:var(--danger);font-weight:500;">(Inativo)</span>':''}</div>
+        <div style="font-size:12px;color:var(--text3);">${m.isAdmin?'Admin':'Colaboradora'} · Senha: <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;">${m.pw}</code></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${(m.clients||[]).join(', ')||'Sem clientes'}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-icon" title="Editar" onclick="editTeamMember('${m.slug}')"><i class="ti ti-pencil"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+window.openTeamModal=function(){
+  document.getElementById('modal-team-title').textContent='Nova colaboradora';
+  document.getElementById('tm-slug-orig').value='';
+  document.getElementById('tm-name').value='';
+  document.getElementById('tm-pw').value='';
+  document.getElementById('tm-role').value='Colaboradora';
+  document.getElementById('tm-clients').value='';
+  document.getElementById('tm-status-wrap').style.display='none';
+  document.getElementById('modal-team').classList.add('open');
+};
+
+window.editTeamMember=async function(slug){
+  // Busca no Firebase primeiro, depois no TEAM hardcoded
+  let m=null;
+  const snap=await getDocs(collection(db,'team_members'));
+  snap.forEach(d=>{if(d.data().slug===slug)m={id:d.id,...d.data()};});
+  if(!m)m=TEAM.find(t=>t.slug===slug);
+  if(!m)return;
+  document.getElementById('modal-team-title').textContent='Editar '+m.name;
+  document.getElementById('tm-slug-orig').value=slug;
+  document.getElementById('tm-name').value=m.name;
+  document.getElementById('tm-pw').value=m.pw;
+  document.getElementById('tm-role').value=m.isAdmin?'Admin':'Colaboradora';
+  document.getElementById('tm-clients').value=(m.clients||[]).join('\n');
+  document.getElementById('tm-status-wrap').style.display='block';
+  document.getElementById('tm-status').value=m.status||'ativo';
+  document.getElementById('modal-team').classList.add('open');
+};
+
+window.saveTeamMember=async function(){
+  const name=document.getElementById('tm-name').value.trim();
+  const pw=document.getElementById('tm-pw').value.trim();
+  const role=document.getElementById('tm-role').value;
+  const clientsRaw=document.getElementById('tm-clients').value;
+  const clients=clientsRaw.split('\n').map(s=>s.trim()).filter(Boolean);
+  const status=document.getElementById('tm-status').value||'ativo';
+  const slugOrig=document.getElementById('tm-slug-orig').value;
+  if(!name||!pw){showToast('Nome e senha obrigatórios','error');return;}
+  const slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const isAdmin=role==='Admin';
+  const data={name,pw,slug,isAdmin,role,clients,status,updatedAt:serverTimestamp()};
+  // Salva no Firebase
+  if(slugOrig){
+    // Edição — busca doc existente
+    const snap=await getDocs(collection(db,'team_members'));
+    let docId=null;
+    snap.forEach(d=>{if(d.data().slug===slugOrig)docId=d.id;});
+    if(docId){await setDoc(doc(db,'team_members',docId),data);}
+    else{await addDoc(collection(db,'team_members'),data);}
+  } else {
+    await addDoc(collection(db,'team_members'),data);
+  }
+  // Atualiza TEAM em memória
+  const idx=TEAM.findIndex(t=>t.slug===(slugOrig||slug));
+  if(idx>=0)TEAM[idx]={...TEAM[idx],...data};
+  else TEAM.push(data);
+  closeModal('modal-team');
+  loadTeamManagement();
+  loadTeamGrid();
+  showToast('Colaboradora salva!','success');
 };
 
 // ═══ PORTAL CLIENTE ═══
